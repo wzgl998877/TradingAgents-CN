@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx specify:*)",
+      "Bash(specify init:*)",
+      "Bash(powershell:*)",
+      "Bash(npm install:*)",
+      "Bash(where node:*)",
+      "Bash(export:*)",
+      "Bash(npx tsc:*)",
+      "Bash(xxd:*)",
+      "Bash(python:*)",
+      "WebSearch",
+      "Bash(node:*)",
+      "Bash(npx.cmd tsc:*)",
+      "Bash(where:*)",
+      "Bash(D:/tool/node/npx.cmd tsc:*)",
+      "Bash(test:*)",
+      "Bash(curl:*)",
+      "Bash(ls:*)",
+      "Bash(node_modules/.bin/tsc.cmd:*)",
+      "Bash(tail:*)",
+      "Bash(head:*)",
+      "Bash(python3:*)",
+      "Bash(echo 创建会话: $SESSION:*)",
+      "Bash(echo session_id: $SID:*)"
+    ]
+  }
+}
