@@ -132,6 +132,113 @@
 
 ⚠️ **重要提醒**：在分析股票之前，请按相关文档要求，将股票数据同步完成，否则分析结果将会出现数据错误。
 
+---
+
+### 💻 本地快速启动（无需 Docker）
+
+#### 方式一：最简方式 — CLI 分析（推荐新手）
+
+核心分析功能**不需要 MongoDB/Redis**，只需 Python + 一个 LLM API Key。
+
+```bash
+# 1. 安装依赖
+cd TradingAgents-CN
+uv pip install -e .
+# 或: pip install -e .
+
+# 2. 设置 API Key（任选一个你有的，以 DeepSeek 为例）
+# CMD:
+set DEEPSEEK_API_KEY=sk-你的key
+# PowerShell:
+# $env:DEEPSEEK_API_KEY = "sk-你的key"
+
+# 3. 运行分析
+python main.py
+```
+
+`main.py` 默认使用 Google Gemini 分析 NVDA。如需切换模型，修改 `main.py` 中的配置：
+
+```python
+config["llm_provider"] = "deepseek"
+config["backend_url"] = "https://api.deepseek.com"
+config["deep_think_llm"] = "deepseek-chat"
+config["quick_think_llm"] = "deepseek-chat"
+```
+
+也可以用 CLI 交互式选择提供商、模型和分析师类型：
+
+```bash
+python -m cli
+```
+
+#### 支持的 LLM 提供商及环境变量
+
+| 提供商 | 环境变量 | 获取地址 |
+|--------|----------|----------|
+| **DeepSeek**（推荐，性价比高） | `DEEPSEEK_API_KEY` | https://platform.deepseek.com/ |
+| **阿里百炼/通义千问** | `DASHSCOPE_API_KEY` | https://dashscope.aliyun.com/ |
+| **AIHubMix**（聚合渠道） | `AIHUBMIX_API_KEY` | https://aihubmix.com/ |
+| **OpenAI** | `OPENAI_API_KEY` | https://platform.openai.com/ |
+| **Google Gemini** | `GOOGLE_API_KEY` | https://ai.google.dev/ |
+| **Anthropic Claude** | `ANTHROPIC_API_KEY` | https://console.anthropic.com/ |
+| **智谱 GLM** | `CUSTOM_OPENAI_API_KEY` | https://open.bigmodel.cn/ |
+| **百度千帆** | `QIANFAN_API_KEY` | https://qianfan.baidubce.com/ |
+| **OpenRouter**（聚合渠道） | `OPENROUTER_API_KEY` | https://openrouter.ai/ |
+| **Ollama**（本地模型） | 无需 Key | https://ollama.com/ |
+
+#### 方式二：轻量 Web — Streamlit
+
+需要 MongoDB 和 Redis，Windows 本地安装方式：
+
+- **MongoDB**：下载 [MongoDB Community Server](https://www.mongodb.com/try/download/community) 安装即可
+- **Redis**：下载 [Memurai](https://www.memurai.com/)（Windows 原生 Redis 兼容），或在 `.env` 中设 `REDIS_ENABLED=false` 跳过
+
+```bash
+# 1. 安装依赖
+uv pip install -e .
+
+# 2. 配置环境
+cp .env.example .env
+# 编辑 .env，至少填入：
+#   - MONGODB_HOST=localhost, MONGODB_PASSWORD=tradingagents123
+#   - REDIS_HOST=localhost（如跳过 Redis 则设 REDIS_ENABLED=false）
+#   - 至少一个 LLM API Key（如 DEEPSEEK_API_KEY）
+
+# 3. 启动
+python web/run_web.py
+# 访问 http://localhost:8501
+```
+
+#### 方式三：全栈开发模式 — FastAPI + Vue 前端
+
+```bash
+# 1. 安装 Python 依赖
+uv pip install -e .
+
+# 2. 配置环境
+cp .env.example .env
+# 编辑 .env（同方式二）
+
+# 3. 启动后端
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+# 4. 启动前端（另开终端）
+cd frontend
+npm install
+npm run dev
+# 访问 http://localhost:3000
+```
+
+#### 三种方式对比
+
+| 方式 | 需要数据库 | 启动命令 | 适用场景 |
+|------|-----------|----------|----------|
+| **CLI 分析** | 不需要 | `python main.py` / `python -m cli` | 快速体验、脚本调用 |
+| **Streamlit Web** | MongoDB + Redis（可选） | `python web/run_web.py` | 轻量 Web 界面 |
+| **全栈开发** | MongoDB + Redis | 后端 `uvicorn` + 前端 `npm run dev` | 开发调试、完整功能 |
+
+---
+
 
 
 #### 📚 使用指南
