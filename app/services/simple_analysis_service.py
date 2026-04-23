@@ -368,6 +368,7 @@ def _get_default_provider_by_model(model_name: str) -> str:
 
         # 智谱AI
         'glm-4': 'glm',
+        'glm-5.1': 'glm',
         'glm-3-turbo': 'glm',
         'chatglm3-6b': 'glm'
     }
