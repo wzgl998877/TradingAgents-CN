@@ -179,7 +179,7 @@ def render_sidebar():
         <div id="localStorage-reader" style="display: none;">
             <script>
             // 从localStorage读取设置并发送给Streamlit
-            const provider = loadFromLocalStorage('llm_provider', 'dashscope');
+            const provider = loadFromLocalStorage('llm_provider', 'custom_openai');
             const category = loadFromLocalStorage('model_category', 'openai');
             const model = loadFromLocalStorage('llm_model', '');
 
@@ -481,9 +481,11 @@ def render_sidebar():
             
             # 初始化session state
             if 'custom_openai_base_url' not in st.session_state:
-                st.session_state.custom_openai_base_url = "https://api.openai.com/v1"
+                st.session_state.custom_openai_base_url = os.getenv("CUSTOM_OPENAI_BASE_URL", "https://api.openai.com/v1")
             if 'custom_openai_api_key' not in st.session_state:
                 st.session_state.custom_openai_api_key = ""
+            if 'custom_model_name' not in st.session_state:
+                st.session_state.custom_model_name = ""
             
             # API端点URL配置
             base_url = st.text_input(
@@ -512,6 +514,7 @@ def render_sidebar():
             
             # 模型选择
             custom_openai_options = [
+                "custom-model",
                 "gpt-4o",
                 "gpt-4o-mini", 
                 "gpt-4-turbo",
@@ -525,20 +528,23 @@ def render_sidebar():
                 "gemini-1.5-pro",
                 "llama-3.1-8b",
                 "llama-3.1-70b",
-                "llama-3.1-405b",
-                "custom-model"
+                "llama-3.1-405b"
             ]
             
             # 获取当前选择的索引
-            current_index = 0
+            current_index = custom_openai_options.index("custom-model")
             if st.session_state.llm_model in custom_openai_options:
                 current_index = custom_openai_options.index(st.session_state.llm_model)
+            elif st.session_state.llm_model:
+                # 非预置模型（如火山方舟 endpoint id），默认走自定义模型输入
+                st.session_state.custom_model_name = st.session_state.llm_model
             
             llm_model = st.selectbox(
                 "选择模型",
                 options=custom_openai_options,
                 index=current_index,
                 format_func=lambda x: {
+                    "custom-model": "自定义模型名称（推荐：填写火山 endpoint id）",
                     "gpt-4o": "GPT-4o - OpenAI最新旗舰",
                     "gpt-4o-mini": "GPT-4o Mini - 轻量旗舰",
                     "gpt-4-turbo": "GPT-4 Turbo - 强化版",
@@ -552,8 +558,7 @@ def render_sidebar():
                     "gemini-1.5-pro": "Gemini 1.5 Pro - 增强版",
                     "llama-3.1-8b": "Llama 3.1 8B - Meta开源",
                     "llama-3.1-70b": "Llama 3.1 70B - 大型开源",
-                    "llama-3.1-405b": "Llama 3.1 405B - 超大开源",
-                    "custom-model": "自定义模型名称"
+                    "llama-3.1-405b": "Llama 3.1 405B - 超大开源"
                 }[x],
                 help="选择要使用的模型，支持各种OpenAI兼容的模型",
                 key="custom_openai_model_select"
@@ -563,12 +568,13 @@ def render_sidebar():
             if llm_model == "custom-model":
                 custom_model_name = st.text_input(
                     "自定义模型名称",
-                    value="",
-                    placeholder="例如: gpt-4-custom, claude-3.5-sonnet-custom",
-                    help="输入自定义的模型名称",
+                    value=st.session_state.custom_model_name,
+                    placeholder="例如: ep-20260423-xxxxxx（火山方舟）",
+                    help="输入自定义模型名称。火山渠道一般填写 endpoint id（ep-开头）",
                     key="custom_model_name_input"
                 )
                 if custom_model_name:
+                    st.session_state.custom_model_name = custom_model_name
                     llm_model = custom_model_name
             
             # 更新session state和持久化存储
@@ -585,6 +591,10 @@ def render_sidebar():
             
             col1, col2 = st.columns(2)
             with col1:
+                if st.button("🔥 火山方舟", key="quick_volc_ark", use_container_width=True):
+                    st.session_state.custom_openai_base_url = "https://ark.cn-beijing.volces.com/api/v3"
+                    st.rerun()
+
                 if st.button("🌐 OpenAI官方", key="quick_openai_official", use_container_width=True):
                     st.session_state.custom_openai_base_url = "https://api.openai.com/v1"
                     st.rerun()

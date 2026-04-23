@@ -7,8 +7,18 @@ import streamlit as st
 import logging
 from urllib.parse import urlencode, parse_qs
 import json
+import os
 
 logger = logging.getLogger(__name__)
+
+
+def _default_provider() -> str:
+    """根据环境变量选择更合理的默认供应商。"""
+    custom_key = os.getenv("CUSTOM_OPENAI_API_KEY", "").strip()
+    custom_base = os.getenv("CUSTOM_OPENAI_BASE_URL", "").strip()
+    if custom_key and custom_base:
+        return "custom_openai"
+    return "dashscope"
 
 class ModelPersistence:
     """模型选择持久化管理器"""
@@ -45,7 +55,7 @@ class ModelPersistence:
             query_params = st.query_params
             if 'provider' in query_params:
                 config = {
-                    'provider': query_params.get('provider', 'dashscope'),
+                    'provider': query_params.get('provider', _default_provider()),
                     'category': query_params.get('category', 'openai'),
                     'model': query_params.get('model', '')
                 }
@@ -62,7 +72,7 @@ class ModelPersistence:
         
         # 返回默认配置
         default_config = {
-            'provider': 'dashscope',
+            'provider': _default_provider(),
             'category': 'openai',
             'model': ''
         }
