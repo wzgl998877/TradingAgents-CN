@@ -99,6 +99,12 @@ class ErrorFormatter:
             "api key", "api_key", "apikey", "invalid_api_key", "authentication", 
             "unauthorized", "401", "403", "gemini", "openai", "dashscope", "qianfan", "qwen", "zhipu", "glm"
         ]):
+            # LLM 模型/端点不存在（例如方舟 endpoint 或 model 名称错误）
+            if any(keyword in error_lower for keyword in [
+                "invalidendpointormodel.notfound", "model or endpoint", "does not exist", "404 not found"
+            ]):
+                return ErrorCategory.LLM_OTHER, llm_provider
+
             # LLM API Key 错误
             if any(keyword in error_lower for keyword in [
                 "api key", "api_key", "apikey", "invalid", "authentication", 

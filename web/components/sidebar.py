@@ -179,7 +179,7 @@ def render_sidebar():
         <div id="localStorage-reader" style="display: none;">
             <script>
             // 从localStorage读取设置并发送给Streamlit
-            const provider = loadFromLocalStorage('llm_provider', 'custom_openai');
+            const provider = loadFromLocalStorage('llm_provider', 'dashscope');
             const category = loadFromLocalStorage('model_category', 'openai');
             const model = loadFromLocalStorage('llm_model', '');
 

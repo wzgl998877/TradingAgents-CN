@@ -6,6 +6,7 @@
 import asyncio
 import uuid
 import logging
+import os
 from datetime import datetime
 from typing import Dict, Any, Optional, List
 from pathlib import Path
@@ -341,6 +342,8 @@ def _get_default_provider_by_model(model_name: str) -> str:
     根据模型名称返回默认的供应商映射
     这是一个后备方案，当数据库查询失败时使用
     """
+    custom_openai_ready = bool(os.getenv("CUSTOM_OPENAI_API_KEY", "").strip() and os.getenv("CUSTOM_OPENAI_BASE_URL", "").strip())
+
     # 模型名称到供应商的默认映射
     model_provider_map = {
         # 阿里百炼 (DashScope)
@@ -367,14 +370,35 @@ def _get_default_provider_by_model(model_name: str) -> str:
         'deepseek-coder': 'deepseek',
 
         # 智谱AI
-        'glm-4': 'glm',
-        'glm-5.1': 'glm',
-        'glm-3-turbo': 'glm',
-        'chatglm3-6b': 'glm'
+        # 若已配置 CUSTOM_OPENAI，优先走兼容 OpenAI 通道（如火山方舟）
+        'glm-4': 'custom_openai' if custom_openai_ready else 'glm',
+        'glm-5.1': 'custom_openai' if custom_openai_ready else 'glm',
+        'glm-3-turbo': 'custom_openai' if custom_openai_ready else 'glm',
+        'chatglm3-6b': 'custom_openai' if custom_openai_ready else 'glm'
     }
 
-    provider = model_provider_map.get(model_name, 'qwen')  # 默认使用阿里百炼
-    logger.info(f"🔧 使用默认映射: {model_name} -> {provider}")
+    normalized_name = (model_name or "").strip().lower()
+    provider = model_provider_map.get(normalized_name)
+
+    # 兜底：避免模型名带版本后缀/大小写差异时误判到 qwen
+    if not provider:
+        if normalized_name.startswith("glm"):
+            provider = "custom_openai" if custom_openai_ready else "glm"
+        elif normalized_name.startswith("qwen"):
+            provider = "qwen"
+        elif normalized_name.startswith("gpt"):
+            provider = "openai"
+        elif normalized_name.startswith("gemini"):
+            provider = "google"
+        elif normalized_name.startswith("deepseek"):
+            provider = "deepseek"
+        else:
+            provider = "qwen"  # 历史默认值，保留兼容
+
+    logger.info(
+        f"使用默认映射: raw={model_name!r}, normalized={normalized_name!r}, "
+        f"custom_openai_ready={custom_openai_ready} -> {provider}"
+    )
     return provider
 
 

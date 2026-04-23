@@ -402,7 +402,7 @@ class ModelCapabilityService:
             return quick_model, deep_model
         except Exception as e:
             logger.error(f"获取默认模型失败: {e}")
-            return "glm-5.1", "glm-5.1"
+            return "qwen-plus", "qwen-max"
     
     def _recommend_model(self, model_type: str, min_level: int) -> str:
         """推荐满足要求的模型"""

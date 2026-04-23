@@ -313,8 +313,8 @@ const invalidCodes = ref<string[]>([])
 
 // 模型设置
 const modelSettings = ref({
-  quickAnalysisModel: 'glm-5.1',
-  deepAnalysisModel: 'glm-5.1'
+  quickAnalysisModel: 'qwen-plus',
+  deepAnalysisModel: 'qwen-max'
 })
 
 // 可用的模型列表（从配置中获取）
@@ -401,8 +401,8 @@ const initializeModelSettings = async () => {
   } catch (error) {
     console.error('加载默认模型配置失败:', error)
     // 使用硬编码的默认值
-    modelSettings.value.quickAnalysisModel = 'glm-5.1'
-    modelSettings.value.deepAnalysisModel = 'glm-5.1'
+    modelSettings.value.quickAnalysisModel = 'qwen-plus'
+    modelSettings.value.deepAnalysisModel = 'qwen-max'
   }
 }
 

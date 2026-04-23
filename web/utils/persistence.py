@@ -14,8 +14,11 @@ logger = logging.getLogger(__name__)
 
 def _default_provider() -> str:
     """根据环境变量选择更合理的默认供应商。"""
+    dashscope_key = os.getenv("DASHSCOPE_API_KEY", "").strip()
     custom_key = os.getenv("CUSTOM_OPENAI_API_KEY", "").strip()
     custom_base = os.getenv("CUSTOM_OPENAI_BASE_URL", "").strip()
+    if dashscope_key:
+        return "dashscope"
     if custom_key and custom_base:
         return "custom_openai"
     return "dashscope"
